@@ -98,7 +98,7 @@ def nearest_sources(cc, cat='NVSS', bacat='SUMSS', radius=1.5, show=True, filena
     ax.scatter(cr, cd, 100, marker='o', color='black', alpha=0.5)
     dist = cc.separation(pos)
     vmax=fl.max()
-    cb_data = ax.scatter(x=pos.ra.deg, y=pos.dec.deg, s=fl, c=fl, alpha=0.7, \
+    cb_data = ax.scatter(x=pos.ra.deg, y=pos.dec.deg, s=200, c=fl, alpha=0.7, \
                       norm=mc.Normalize(vmin=vmin,vmax=vmax), cmap='rainbow')
     a = ax.set_xlim([cr-radius,cr+radius])
     b = ax.set_ylim([cd-radius,cd+radius])
