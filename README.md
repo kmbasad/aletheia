@@ -5,7 +5,9 @@ Install: `git clone https://github.com/kmbasad/aletheia`
 Go to the `scripts` directory.
 
 To see the brightest sources (>100 mJy) from NVSS and SUMSS catalogs around a coordinate run:  
-`python narcissus.py -c '325.063 -23.661' -S`  
+`python narcissus.py -c '325.063 -23.661' -r 1.5 -S`  
+Where `-r` specifies the radius of the region to llok for.  
+The red dotted lines show the FWHM and NULL at the highest frequency of MeerKAT L-band beam. And the blue lines show the same for the lowest frequency.  
 The title of the plot will show the nearest MeerKAT calibrator name and distance.
 
 To see the source track on any day run:  
