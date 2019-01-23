@@ -1,5 +1,7 @@
 # Aletheia
 
+Dependencies: `astropy`, `astroquery`, `scipy`
+
 Install: `git clone https://github.com/kmbasad/aletheia`  
 
 Go to the `scripts` directory.
