@@ -122,4 +122,3 @@ if __name__=='__main__':
         best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.show,\
          distsun=args.dist_sun, distmoon=args.dist_moon)
     else: raise Exception('The date format is wrong')
-

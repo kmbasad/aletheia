@@ -74,14 +74,14 @@ def meerkat_beamwidth(plot=False):
     null = fwhm*1.699
     return fwhm, null
 
-def nearest_sources(cc, cat='NVSS', bacat='SUMSS', show=True, filename='nearesr_bright_sources.png'):
+def nearest_sources(cc, cat='NVSS', bacat='SUMSS', radius=1.5, show=True, filename='nearesr_bright_sources.png'):
     Vizier.ROW_LIMIT = -1
     cr, cd = cc.ra.value, cc.dec.value
     try:
-        p = Vizier.query_region("%f %f"%(cr,cd), radius=1.5*u.degree, catalog=cat)
+        p = Vizier.query_region("%f %f"%(cr,cd), radius=radius*u.degree, catalog=cat)
         S = p[0][:]['S1.4']
     except:
-        p = Vizier.query_region("%f %f"%(cr,cd), radius=1.5*u.degree, catalog=bacat)
+        p = Vizier.query_region("%f %f"%(cr,cd), radius=radius*u.degree, catalog=bacat)
         S = p[0][:]['St']
     positions = co.SkyCoord(ra=co.Angle(p[0][:]['RAJ2000'], unit=u.hour), dec=co.Angle(p[0][:]['DEJ2000'], unit=u.deg))
     field = p[0]
@@ -100,8 +100,8 @@ def nearest_sources(cc, cat='NVSS', bacat='SUMSS', show=True, filename='nearesr_
     vmax=fl.max()
     cb_data = ax.scatter(x=pos.ra.deg, y=pos.dec.deg, s=fl, c=fl, alpha=0.7, \
                       norm=mc.Normalize(vmin=vmin,vmax=vmax), cmap='rainbow')
-    a = ax.set_xlim([cr-1.5,cr+1.5])
-    b = ax.set_ylim([cd-1.5,cd+1.5])
+    a = ax.set_xlim([cr-radius,cr+radius])
+    b = ax.set_ylim([cd-radius,cd+radius])
 
     fwhm, null = meerkat_beamwidth()
 
@@ -109,8 +109,9 @@ def nearest_sources(cc, cat='NVSS', bacat='SUMSS', show=True, filename='nearesr_
     ax.add_artist(plt.Circle((cr,cd), null[0], fill=False, color='red', linestyle='--'))
     ax.add_artist(plt.Circle((cr,cd), fwhm[1], fill=False, color='blue', linestyle='--'))
     ax.add_artist(plt.Circle((cr,cd), null[1], fill=False, color='blue', linestyle='--'))
-    ax.set_xticks([cr-1.,cr-0.5,cr,cr+.5,cr+1])
-    ax.set_yticks([cd-1.,cd-.5,cd,cd+.5,cd+1])
+    r = radius
+    ax.set_xticks([cr-r,cr-r/2.,cr,cr+r/2.,cr+r])
+    ax.set_yticks([cd-r,cd-r/2.,cd,cd+r/2.,cd+r])
 
     plt.axes().set_aspect('equal', 'datalim')
     ax.grid()
@@ -128,8 +129,9 @@ def nearest_sources(cc, cat='NVSS', bacat='SUMSS', show=True, filename='nearesr_
     else: fig.tight_layout(); fig.savefig(filename, dpi=80)
     
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description='Calculate whether this day is auspicious for your observation or not')
+    parser=argparse.ArgumentParser(description='Show the nearest brightest sources around a coordinate')
     parser.add_argument('-c', '--coord', help="Coordinate as '325:03:47.67 -23:39:40.71' or '325.063 -23.661'", type=str, required=True)
+    parser.add_argument('-r', '--radius', help="Radius of the region", type=float, default=1.5, required=False)
     parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', \
         default=False, required=False)
     args = parser.parse_args()
@@ -138,4 +140,4 @@ if __name__=='__main__':
     if len(c[0].split())==3: cc = co.SkyCoord(ra=c[0], dec=c[1], unit=(u.hourangle, u.deg))
     elif len(c[0].split())==1: cc = co.SkyCoord(ra=c[0], dec=c[1], unit='deg')
     else: raise Exception('The sky coordinate format is wrong')
-    nearest_sources(cc, show=args.show)
+    nearest_sources(cc, radius=args.radius, show=args.show)
