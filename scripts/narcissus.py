@@ -23,9 +23,9 @@ def meerkat_calibrator(tc):
 
     return cal[idx], d2d
 
-def good_channels(nu=None, bads=None):
-    if nu==None: nu = np.arange(856, 856+857)
-    if bads==None: bads=([856,870], [920,960], [1125,1305], [1380,1384], [1463,1492], [1520,1630], [1670,1720])
+def good_channels():
+    nu = np.arange(856, 856+857)
+    bads=([856,870], [920,960], [1125,1305], [1380,1384], [1463,1492], [1520,1630], [1670,1720])
     ind = []
     for bad in bads:
         ind.append(np.where((nu>=bad[0]) & (nu<=bad[1])))   
