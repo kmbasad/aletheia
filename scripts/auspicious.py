@@ -51,6 +51,8 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
         plt.legend(loc='best', ncol=2)
         plt.grid()
         plt.title(date)
+        plt.xlabel('Time from midnight [hour]')
+        plt.ylabel('Elevation [degree]')
         if show: plt.show()
         else: plt.tight_layout(); plt.savefig(filename, dpi=80)
 
