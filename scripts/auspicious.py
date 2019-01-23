@@ -57,7 +57,7 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
     else: return tg
 
 def best_times_year(c, year=2019, lat=-30.7133, lon=21.443, utcoff=2., delta=15, elev=20., night=False, show=True, \
-    filename='auspiciousness_year.png'):
+    filename='auspiciousness_year.png', distsun=5, distmoon=3):
     start = datetime.strptime(str(year)+'-1-1', "%Y-%m-%d")
     stop = datetime.strptime(str(year+1)+'-1-1', "%Y-%m-%d")
     goods = []
