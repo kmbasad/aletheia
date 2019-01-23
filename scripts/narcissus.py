@@ -74,7 +74,7 @@ def meerkat_beamwidth(plot=False):
     null = fwhm*1.699
     return fwhm, null
 
-def nearest_sources(cc, cat='NVSS', bacat='SUMSS', radius=1.5, show=True, filename='nearesr_bright_sources.png'):
+def nearest_sources(cc, cat='NVSS', bacat='SUMSS', radius=1.5, show=True, filename='nearest_bright_sources.png'):
     Vizier.ROW_LIMIT = -1
     cr, cd = cc.ra.value, cc.dec.value
     try:
