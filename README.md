@@ -10,6 +10,7 @@ The title of the plot will show the nearest MeerKAT calibrator name and distance
 
 To see the source track on any day run:  
 `python auspicious.py -c '325.063 -23.661' -d '2019-1-1' -el 20 -S`  
+where the date format is `year-month-day`
 
 And to see how many hours a target stays close to its highest elevation (transit) throughout a year, just replace '2019-1-1' with '2019':  
 `python auspicious.py -c '325.063 -23.661' -d '2019' -S`  
