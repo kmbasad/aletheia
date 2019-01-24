@@ -108,6 +108,7 @@ if __name__=='__main__':
     parser.add_argument('-el', '--elcut', help='Target elevation cut from the maximum in percent', default=20., type=float, required=False)
     parser.add_argument('-N', '--night', help="Add '-N' to observe only at night?", action='store_true', required=False)
     parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', default=False, required=False)
+    parser.add_argument('-f', '--filename', help="Output filename: jpg,png,pdf", default='auspiciousness.png', required=False)
     args = parser.parse_args()
 
     dat = args.date.split('-')
@@ -119,8 +120,8 @@ if __name__=='__main__':
 
     if len(dat)==3:
         g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.show,\
-            distsun=args.dist_sun, distmoon=args.dist_moon)
+            distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
     elif len(dat)==1:
         best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.show,\
-         distsun=args.dist_sun, distmoon=args.dist_moon)
+         distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
     else: raise Exception('The date format is wrong')
