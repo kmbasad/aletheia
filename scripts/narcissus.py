@@ -134,10 +134,11 @@ if __name__=='__main__':
     parser.add_argument('-r', '--radius', help="Radius of the region", type=float, default=1.5, required=False)
     parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', \
         default=False, required=False)
+    parser.add_argument('-f', '--filename', help="Output filename: jpg,png,pdf", default='narcissus.png', required=False)
     args = parser.parse_args()
 
     c = args.coord.split(' ')
     if len(c[0].split())==3: cc = co.SkyCoord(ra=c[0], dec=c[1], unit=(u.hourangle, u.deg))
     elif len(c[0].split())==1: cc = co.SkyCoord(ra=c[0], dec=c[1], unit='deg')
     else: raise Exception('The sky coordinate format is wrong')
-    nearest_sources(cc, radius=args.radius, show=args.show)
+    nearest_sources(cc, radius=args.radius, show=args.show, filename=args.filename)
