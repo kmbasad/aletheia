@@ -20,3 +20,5 @@ And to see how many hours a target stays close to its highest elevation (transit
 `python auspicious.py -c '325.063 -23.661' -d '2019' -S`  
 
 To see help files for either scripts use `-h` or `--help`
+
+SOME EXAMPLE IMAGES ARE GIVEN IN THE WIKI.
