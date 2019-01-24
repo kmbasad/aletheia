@@ -65,7 +65,7 @@ def best_times_year(c, year=2019, lat=-30.7133, lon=21.443, utcoff=2., delta=15,
     goods = []
     while start < stop:
         print(start.year, start.month, start.day)
-        g = best_times_day(c, date=start, plot=False, elev=elev, night=night)
+        g = best_times_day(c, lat=lat, lon=lon, utcoff=utcoff, date=start, plot=False, elev=elev, night=night, distsun=distsun,distmoon=distmoon)
         goods.append(g)
         start = start + timedelta(days=delta)
 
@@ -91,7 +91,7 @@ def best_times_year(c, year=2019, lat=-30.7133, lon=21.443, utcoff=2., delta=15,
     plt.xlim(0,366)
     plt.ylim(0,4.)
     plt.ylabel('Good times [hour]')
-    plt.title("%s %s (%i)"%(c.ra,c.dec,year))
+    plt.title("%s (%i)"%(c.to_string('hmsdms'),year))
     plt.grid()
 
     if show: plt.show()
