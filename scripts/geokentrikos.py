@@ -1,4 +1,5 @@
 from skyfield.api import Topos, load
+import numpy as np
 
 def angular_separation(ra, dec, phase_centre):
     """
@@ -28,18 +29,18 @@ def angular_separation(ra, dec, phase_centre):
 def get_sat_tles(geostationary=True):
     '''
     Collect the satellite TLEs that fall in the L-Band.
-    
+
     Parameters
     ----------
     geostationary: boolean
         Include geostationary staellites or not.
-    
+
     Returns
     -------
     sats: dictionary
         Satellite TLEs ready for consumption by Skyfield.
     '''
-    
+
     source_url = 'https://www.celestrak.com/NORAD/elements/'
     gps_tles = ['gps-ops.txt', 'glo-ops.txt', 'beidou.txt', 'galileo.txt', 'sbas.txt', ]
     comms_tles = ['iridium.txt', 'iridium-NEXT.txt', 'geo.txt']
@@ -47,18 +48,18 @@ def get_sat_tles(geostationary=True):
         LbandSats = gps_tles + comms_tles
     else:
         LbandSats = gps_tles + comms_tles[:-1]
-    
+
     sats = {}
     for i in range(len(LbandSats)):
         sats.update(load.tle(source_url+LbandSats[i]))
-        
+
     return sats
 
 
 def sat_separations(params):
     '''
     Separation between a source and set of satellites.
-    
+
     Parameters
     ----------
     params: list
@@ -67,31 +68,31 @@ def sat_separations(params):
         Right Ascension of source in radians.
     source_dec: float
         Declination of source in radians.
-    date: time object
+    date: datetime
         Date and time of observation.
-        
+
     Returns
     -------
     separations: array
         Angular separation between each satellite and the source in degrees.
     '''
-    
+
     source, t = params
-    
+
     source_ra, source_dec = source
-    
+
     satellites = get_sat_tles()
-    
+
+    ts = load.timescale()
+
     tt = ts.utc(*[int(x) for x in t.strftime('%Y %m %d %H %M %S').split()])
     mkat = Topos('30.7130 S', '21.4430 E')
-    
+
     separations = np.zeros((len(satellites.items())))
-    
+
     for j, sat in enumerate(satellites.items()):
 
         sat_ra, sat_dec = [(sat[1]-mkat).at(tt).radec(ts.J2000)[i].radians for i in range(2)]
         separations[j] = np.rad2deg(angular_separation(sat_ra, sat_dec, [source_ra, source_dec]))
-    
-    return separations 
 
-
+    return separations
