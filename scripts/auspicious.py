@@ -11,7 +11,7 @@ from parallelize import parmap
 from geokentrikos import sat_separations
 
 def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01', plot=True, show=False,\
-                 distsun=5, distmoon=3, elev=20, night=False, leg=None, setrise=True, filename='auspiciousness_day.png'):
+                 distsun=5, distmoon=3, elev=20, night=False, leg=None, setrise=True, filename='auspiciousness_day.png', satellites=False):
     location = co.EarthLocation(lat=lat*u.deg, lon=lon*u.deg, height=1e3*u.m)
     utcoffset = utcoff*u.hour
     timesteps = 120
@@ -39,7 +39,7 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
     except: tg = None
 
     if satellites:
-        sat_times = [times[g][0]+i*timedelta(minutes=1) for i in range(int((tg[-1]-tg[0]).to(u.minute)/u.minute))]
+        sat_times = [(times[g][0]+i*u.minute).datetime for i in range(int((tg[-1]-tg[0]).to(u.minute)/u.minute))]
         params = [list(i) for i in zip([[coord.ra.rad, coord.dec.rad] for i in range(len(sat_times))], sat_times)]
         min_seps = np.nanmin(np.array(parmap(sat_separations, params)), axis=1)
         sat_time_steps = np.linspace(delta_time[g][0], delta_time[g][-1], len(min_seps))
@@ -127,6 +127,7 @@ if __name__=='__main__':
     parser.add_argument('-el', '--elcut', help='Target elevation cut from the maximum in percent', default=20., type=float, required=False)
     parser.add_argument('-N', '--night', help="Add '-N' to observe only at night?", action='store_true', required=False)
     parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', default=False, required=False)
+    parser.add_argument('-s', '--sats', help="Include minimum satellite separation.", action='store_true', default=False, required=False)
     parser.add_argument('-f', '--filename', help="Output filename: jpg,png,pdf", default='auspiciousness.png', required=False)
     args = parser.parse_args()
 
@@ -139,7 +140,7 @@ if __name__=='__main__':
 
     if len(dat)==3:
         g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.show,\
-            distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
+            distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename, satellites=args.sats)
     elif len(dat)==1:
         best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.show,\
          distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
