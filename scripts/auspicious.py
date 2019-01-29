@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from datetime import timedelta
 import argparse
+from parallelize import parmap
+from geokentrikos import sat_separations
 
 def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01', plot=True, show=False,\
                  distsun=5, distmoon=3, elev=20, night=False, leg=None, setrise=True, filename='auspiciousness_day.png'):
@@ -28,14 +30,22 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
     ind_moon = np.where(src.separation(moon).deg<distmoon)[0]
     alt_max = src.alt.max()
     ind_low = np.where(src.alt<=(alt_max-alt_max*(elev/100.)))[0]
-    
+
     if night==True: ind_day = np.where(sun.alt>0*u.deg)[0]
     else: ind_day = [None]
 
     g = np.sort(list(set(ind)-set(ind_riseset)-set(ind_sun)-set(ind_moon)-set(ind_low)-set(ind_day)))
     try: tg = delta_time[g]
     except: tg = None
-    
+
+    if satellites:
+        sat_times = [times[g][0]+i*timedelta(minutes=1) for i in range(int((tg[-1]-tg[0]).to(u.minute)/u.minute))]
+        params = [list(i) for i in zip([[coord.ra.rad, coord.dec.rad] for i in range(len(sat_times))], sat_times)]
+        min_seps = np.nanmin(np.array(parmap(sat_separations, params)), axis=1)
+        sat_time_steps = np.linspace(delta_time[g][0], delta_time[g][-1], len(min_seps))
+        sat_frame = co.AltAz(obstime=sat_times, location=location)
+        sat_alts = coord.transform_to(sat_frame).alt
+
     if plot==True:
         plt.plot(delta_time, sun.alt, 'r--', label='Sun')
         plt.plot(delta_time, moon.alt, 'b--', label='Moon')
@@ -43,8 +53,12 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
                  color='0.5', alpha=0.5)
         plt.fill_between(delta_time.to('hr').value, 0, 90, sun.alt<0*u.deg, color='0.9', alpha=0.7)
         plt.plot(delta_time, src.alt, 'g-', label='Target')
-        try: plt.scatter(delta_time[g], src.alt[g], s=30, c='g', alpha=0.5, label='Best time')
-        except: None
+        if satellites:
+            try: cb = plt.scatter(sat_time_steps, sat_alts, c=min_seps, s=30, alpha=0.5, vmin=0, vmax=10)
+            except: None
+        else:
+            try: plt.scatter(delta_time[g], src.alt[g], s=30, c='g', alpha=0.5, label='Best time')
+            except: None
         plt.ylim(0,90)
         plt.xlim(-12,12)
         plt.xticks(range(-12,13,2))
@@ -53,6 +67,11 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
         plt.title(date)
         plt.xlabel('Time from midnight [hour]')
         plt.ylabel('Elevation [degree]')
+        if satellites:
+            cbar = plt.colorbar(cb)
+            cbar.set_ticks(np.arange(0, 11, 2))
+            cbar.set_label('Angular separation from closest satellite\n[degree]',
+                           rotation=270, labelpad=+20)
         if show: plt.show()
         else: plt.tight_layout(); plt.savefig(filename, dpi=80)
 
