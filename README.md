@@ -4,9 +4,7 @@ Dependencies: `astropy`, `astroquery`, `skyfield`, `scipy`
 
 Clone: `git clone https://github.com/kmbasad/aletheia`  
 
-Either run the individual scipts from within the `scripts` directory, or add that directory to your path using:
-
-`PATH=/path/to/aletheia/scripts:$PATH`
+For now, the scripts can be run only from within the `scripts` directory.
 
 ## Find nearest sources
 
