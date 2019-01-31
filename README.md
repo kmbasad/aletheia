@@ -1,6 +1,6 @@
 # Aletheia
 
-Dependencies: `astropy`, `astroquery`, `skyfield', `scipy`
+Dependencies: `astropy`, `astroquery`, `skyfield`, `scipy`
 
 Clone: `git clone https://github.com/kmbasad/aletheia`  
 
