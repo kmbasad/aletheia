@@ -1,6 +1,11 @@
 from skyfield.api import Topos, load
 import numpy as np
 
+import os, ssl
+if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
+    getattr(ssl, '_create_unverified_context', None)): 
+    ssl._create_default_https_context = ssl._create_unverified_context
+
 def angular_separation(ra, dec, phase_centre):
     """
     Calculates the angular separation between a source and the phase centre.

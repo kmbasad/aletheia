@@ -39,6 +39,7 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
     except: tg = None
 
     if satellites:
+        print "Calculating satellite separations"
         sat_times = [(times[g][0]+i*u.minute).datetime for i in range(int((tg[-1]-tg[0]).to(u.minute)/u.minute))]
         params = [list(i) for i in zip([[coord.ra.rad, coord.dec.rad] for i in range(len(sat_times))], sat_times)]
         min_seps = np.nanmin(np.array(parmap(sat_separations, params)), axis=1)
@@ -64,13 +65,13 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
         plt.xticks(range(-12,13,2))
         plt.legend(loc='best', ncol=2)
         plt.grid()
-        plt.title(date)
+        plt.title("{0} to {1}".format(str(Time(date)-1*u.day).split()[0],date))
         plt.xlabel('Time from midnight [hour]')
-        plt.ylabel('Elevation [degree]')
+        plt.ylabel('Elevation [deg]')
         if satellites:
             cbar = plt.colorbar(cb)
             cbar.set_ticks(np.arange(0, 11, 2))
-            cbar.set_label('Angular separation from closest satellite\n[degree]',
+            cbar.set_label('Nearest satellite distance [deg]',
                            rotation=270, labelpad=+20)
         if show: plt.show()
         else: plt.tight_layout(); plt.savefig(filename, dpi=80)
@@ -126,8 +127,8 @@ if __name__=='__main__':
     parser.add_argument('-mo', '--dist_moon', help='Minimum distance to the moon', default=3., type=float, required=False)
     parser.add_argument('-el', '--elcut', help='Target elevation cut from the maximum in percent', default=20., type=float, required=False)
     parser.add_argument('-N', '--night', help="Add '-N' to observe only at night?", action='store_true', required=False)
-    parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', default=False, required=False)
-    parser.add_argument('-s', '--sats', help="Include minimum satellite separation.", action='store_true', default=False, required=False)
+    parser.add_argument('-V', '--view', help="Add '-V' to view the plot. By default it will be saved as png", action='store_true', default=False, required=False)
+    parser.add_argument('-S', '--sats', help="Include minimum satellite separation.", action='store_true', default=False, required=False)
     parser.add_argument('-f', '--filename', help="Output filename: jpg,png,pdf", default='auspiciousness.png', required=False)
     args = parser.parse_args()
 
@@ -139,9 +140,10 @@ if __name__=='__main__':
     lat, lon = float(args.latlon.split(' ')[0]), float(args.latlon.split(' ')[1])
 
     if len(dat)==3:
-        g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.show,\
+        g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.view,\
             distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename, satellites=args.sats)
     elif len(dat)==1:
-        best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.show,\
+        best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.view,\
          distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
     else: raise Exception('The date format is wrong')
+

@@ -59,5 +59,3 @@ def parmap(f, X, proc_power=1):
     [p.join() for p in proc]
 
     return [x for i, x in sorted(res)]
-
-
