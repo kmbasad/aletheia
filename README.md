@@ -24,7 +24,7 @@ To see the source track on any day run:
 `python auspicious.py -c '325.063 -23.661' -d '2019-1-1' -el 20 -V`  
 where the date format is `year-month-day`
 
-If you want to show the distance to the nearest satellite on the same plot add the `-S` option:
+If you want to show the distance to the nearest satellite on the same plot add the `-S` option:  
 `python auspicious.py -c '325.063 -23.661' -d '2019-1-1' -V -S`  
 CAUTION: this takes a long time; the task is parallelized, so please use a suitable cluster.
 
