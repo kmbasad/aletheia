@@ -12,7 +12,8 @@ Either run the individual scipts from within the `scripts` directory, or add tha
 
 To see the brightest sources (>100 mJy) from NVSS and SUMSS catalogs around a coordinate run:  
 `python narcissus.py -c '325.063 -23.661' -r 1.5 -S`  
-Where `-r` specifies the radius of the region to llok for.  
+Where `-r` specifies the radius of the region to look for.  
+
 The red dotted lines show the FWHM and NULL at the highest frequency of MeerKAT L-band beam. And the blue lines show the same for the lowest frequency.  
 
 The title of the plot will show the nearest MeerKAT calibrator name and distance.
