@@ -7,9 +7,11 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from datetime import timedelta
 import argparse
+from parallelize import parmap
+from geokentrikos import sat_separations
 
 def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01', plot=True, show=False,\
-                 distsun=5, distmoon=3, elev=20, night=False, leg=None, setrise=True, filename='auspiciousness_day.png'):
+                 distsun=5, distmoon=3, elev=20, night=False, leg=None, setrise=True, filename='auspiciousness_day.png', satellites=False):
     location = co.EarthLocation(lat=lat*u.deg, lon=lon*u.deg, height=1e3*u.m)
     utcoffset = utcoff*u.hour
     timesteps = 120
@@ -28,14 +30,23 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
     ind_moon = np.where(src.separation(moon).deg<distmoon)[0]
     alt_max = src.alt.max()
     ind_low = np.where(src.alt<=(alt_max-alt_max*(elev/100.)))[0]
-    
+
     if night==True: ind_day = np.where(sun.alt>0*u.deg)[0]
     else: ind_day = [None]
 
     g = np.sort(list(set(ind)-set(ind_riseset)-set(ind_sun)-set(ind_moon)-set(ind_low)-set(ind_day)))
     try: tg = delta_time[g]
     except: tg = None
-    
+
+    if satellites:
+        print "Calculating satellite separations"
+        sat_times = [(times[g][0]+i*u.minute).datetime for i in range(int((tg[-1]-tg[0]).to(u.minute)/u.minute))]
+        params = [list(i) for i in zip([[coord.ra.rad, coord.dec.rad] for i in range(len(sat_times))], sat_times)]
+        min_seps = np.nanmin(np.array(parmap(sat_separations, params)), axis=1)
+        sat_time_steps = np.linspace(delta_time[g][0], delta_time[g][-1], len(min_seps))
+        sat_frame = co.AltAz(obstime=sat_times, location=location)
+        sat_alts = coord.transform_to(sat_frame).alt
+
     if plot==True:
         plt.plot(delta_time, sun.alt, 'r--', label='Sun')
         plt.plot(delta_time, moon.alt, 'b--', label='Moon')
@@ -43,16 +54,25 @@ def best_times_day(coord, lat=-30.7133, lon=21.443, utcoff=2., date='2019-01-01'
                  color='0.5', alpha=0.5)
         plt.fill_between(delta_time.to('hr').value, 0, 90, sun.alt<0*u.deg, color='0.9', alpha=0.7)
         plt.plot(delta_time, src.alt, 'g-', label='Target')
-        try: plt.scatter(delta_time[g], src.alt[g], s=30, c='g', alpha=0.5, label='Best time')
-        except: None
+        if satellites:
+            try: cb = plt.scatter(sat_time_steps, sat_alts, c=min_seps, s=30, alpha=0.5, vmin=0, vmax=10)
+            except: None
+        else:
+            try: plt.scatter(delta_time[g], src.alt[g], s=30, c='g', alpha=0.5, label='Best time')
+            except: None
         plt.ylim(0,90)
         plt.xlim(-12,12)
         plt.xticks(range(-12,13,2))
         plt.legend(loc='best', ncol=2)
         plt.grid()
-        plt.title(date)
+        plt.title("{0} to {1}".format(str(Time(date)-1*u.day).split()[0],date))
         plt.xlabel('Time from midnight [hour]')
-        plt.ylabel('Elevation [degree]')
+        plt.ylabel('Elevation [deg]')
+        if satellites:
+            cbar = plt.colorbar(cb)
+            cbar.set_ticks(np.arange(0, 11, 2))
+            cbar.set_label('Nearest satellite distance [deg]',
+                           rotation=270, labelpad=+20)
         if show: plt.show()
         else: plt.tight_layout(); plt.savefig(filename, dpi=80)
 
@@ -107,7 +127,8 @@ if __name__=='__main__':
     parser.add_argument('-mo', '--dist_moon', help='Minimum distance to the moon', default=3., type=float, required=False)
     parser.add_argument('-el', '--elcut', help='Target elevation cut from the maximum in percent', default=20., type=float, required=False)
     parser.add_argument('-N', '--night', help="Add '-N' to observe only at night?", action='store_true', required=False)
-    parser.add_argument('-S', '--show', help="Add '-S' to show the plot. By default it will be saved as png", action='store_true', default=False, required=False)
+    parser.add_argument('-V', '--view', help="Add '-V' to view the plot. By default it will be saved as png", action='store_true', default=False, required=False)
+    parser.add_argument('-S', '--sats', help="Include minimum satellite separation.", action='store_true', default=False, required=False)
     parser.add_argument('-f', '--filename', help="Output filename: jpg,png,pdf", default='auspiciousness.png', required=False)
     args = parser.parse_args()
 
@@ -119,9 +140,10 @@ if __name__=='__main__':
     lat, lon = float(args.latlon.split(' ')[0]), float(args.latlon.split(' ')[1])
 
     if len(dat)==3:
-        g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.show,\
-            distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
+        g = best_times_day(cc, lat=lat, lon=lon, utcoff=args.utc, date=args.date, night=args.night, elev=args.elcut, show=args.view,\
+            distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename, satellites=args.sats)
     elif len(dat)==1:
-        best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.show,\
+        best_times_year(cc, year=int(args.date), lat=lat, lon=lon, utcoff=args.utc, night=args.night, elev=args.elcut, show=args.view,\
          distsun=args.dist_sun, distmoon=args.dist_moon, filename=args.filename)
     else: raise Exception('The date format is wrong')
+
