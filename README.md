@@ -29,7 +29,7 @@ If you want to show the distance to the nearest satellite on the same plot add t
 CAUTION: this takes a long time; the task is parallelized, so please use a suitable cluster.
 
 To see how many hours a target stays close to its highest elevation (transit) throughout a year, just replace '2019-1-1' with '2019':  
-`python auspicious.py -c '325.063 -23.661' -d '2019' -S`  
+`python auspicious.py -c '325.063 -23.661' -d '2019' -V`  
 
 To see help files for either scripts use `-h` or `--help`
 
